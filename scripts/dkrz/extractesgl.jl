@@ -1,6 +1,9 @@
 using DrWatson
 @quickactivate "S2DExploration"
 using ERA5Reanalysis
+using Logging
+
+include(srcdir("common.jl"))
 
 e5ds = ERA5Hourly(start=Date(2001),stop=Date(2024,12,31),path=datadir())
 evar = SingleVariable("t2m")
@@ -13,10 +16,11 @@ ipnt = closestnativelonlat(Point2(lon,lat))
 vmat = zeros(24*ndt)
 
 for idt in 1 : ndt
+    @info "$(now()) - S2DExploration - Extraction point data $(evar.name) for ($(lon),$(lat)) from the DKRZ servers"
     ibeg = (idt-1) * 24 + 1
     iend = idt * 24
     gds = dkrz(e5ds,evar,dtvec[idt])
-    vmat[ibeg:iend] .= gds[param.ID][ipnt,:]
+    vmat[ibeg:iend] .= gds[evar.ID][ipnt,:]
     close(gds)
 end
 
@@ -34,12 +38,12 @@ ds = NCDataset(fnc,"c",attrib = Dict(
 ds.dim["valid_time"] = ndt * 24
 
 nctime = defVar(ds,"valid_time",Int64,("valid_time",),attrib = Dict(
-    "units"     => "hours since $(dt) 00:00:00.0",
+    "units"     => "hours since $(e5ds.start) 00:00:00.0",
     "long_name" => "time",
     "calendar"  => "gregorian",
 ))
 
-ncvar = defVar(ds,evar.ID,Float32,("valid_time",),attrib = Dict(
+ncvar = defVar(ds,evar.ID,Float64,("valid_time",),attrib = Dict(
     "long_name"     => evar.long,
     "full_name"     => evar.name,
     "units"         => evar.units,
