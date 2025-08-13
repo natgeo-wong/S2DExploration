@@ -1,0 +1,51 @@
+using DrWatson
+@quickactivate "S2DExploration"
+using ERA5Reanalysis
+
+e5ds = ERA5Hourly(start=Date(2001),stop=Date(2024,12,31),path=datadir())
+evar = SingleVariable("t2m")
+
+dtvec = e5ds.start : Day(1) : e5ds.stop; ndt = length(dtvec)
+gID =
+lon =
+lat =
+ipnt = closestnativelonlat(Point2(lon,lat))
+vmat = zeros(24*ndt)
+
+for idt in 1 : ndt
+    ibeg = (idt-1) * 24 + 1
+    iend = idt * 24
+    gds = dkrz(e5ds,evar,dtvec[idt])
+    vmat[ibeg:iend] .= gds[param.ID][ipnt,:]
+    close(gds)
+end
+
+fnc = gID * "-" * evar.ID * "-" * ymd2str(e5ds.start) * "-" * ymd2str(e5ds.stop) * ".nc"
+fnc = joinpath(e5ds.path,fnc)
+
+if isfile(fnc); rm(fnc) end
+ds = NCDataset(fnc,"c",attrib = Dict(
+    "Conventions" => "CF-1.6",
+    "history"     => "Created on $(Dates.now()) with ERA5Reanalysis.jl",
+    "comments"    => "ERA5Reanalysis.jl creates NetCDF files in the same format that data is saved on the Climate Data Store",
+    "doi"         => e5ds.sldoi
+))
+
+ds.dim["valid_time"] = ndt * 24
+
+nctime = defVar(ds,"valid_time",Int64,("valid_time",),attrib = Dict(
+    "units"     => "hours since $(dt) 00:00:00.0",
+    "long_name" => "time",
+    "calendar"  => "gregorian",
+))
+
+ncvar = defVar(ds,evar.ID,Float32,("valid_time",),attrib = Dict(
+    "long_name"     => evar.long,
+    "full_name"     => evar.name,
+    "units"         => evar.units,
+))
+
+nctime[:] = collect(1:(24*ndt)) .- 1
+ncvar[:] = vmat
+
+close(ds)
