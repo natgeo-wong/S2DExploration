@@ -48,6 +48,6 @@ ncvar = defVar(ds,"Tb",Float32,("valid_time",),attrib = Dict(
 ))
 
 nctime[:] = (collect(1:(48*ndt)) .- 1) ./ 2
-ncvar[:,:] = tbdata[:]
+ncvar[:] = tbdata[:]
 
 close(ds)
