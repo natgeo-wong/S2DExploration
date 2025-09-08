@@ -27,15 +27,15 @@ tmpd = zeros(Float32,nlon,nlat,48)
 
 for istn = 1 : nstn
     if .!isnan(slon[istn]) && .!isnan(slat[istn])
-        ilon = argmin(abs.(slon[istn].-ggrd.lon))
-        ilat = argmin(abs.(slat[istn].-ggrd.lat))
+        ilon[istn] = argmin(abs.(slon[istn].-ggrd.lon))
+        ilat[istn] = argmin(abs.(slat[istn].-ggrd.lat))
     end
 end
 
 for idt = 1 : ndt
 
     ids = read(tbd,geo,dtvec[idt])
-    tmpd = NCDatasets.load!(ids["Tb"].var,tmpd,:,:,:)
+    NCDatasets.load!(ids["Tb"].var,tmpd,:,:,:)
 
     for istn = 1 : nstn
         if !iszero(ilon[istn])
