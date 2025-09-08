@@ -18,8 +18,8 @@ ggrd = RegionGrid(geo,lon,lat)
 
 for istn = 1 : nstn
 
-    ilon = argmin(abs.(slon.-ggrd.lon))
-    ilat = argmin(abs.(slat.-ggrd.lat))
+    ilon = argmin(abs.(slon[istn].-ggrd.lon))
+    ilat = argmin(abs.(slat[istn].-ggrd.lat))
 
     for idt = 1 : ndt
 
