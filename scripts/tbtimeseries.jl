@@ -59,7 +59,7 @@ for istn = 1 : nstn
 
     ds.dim["valid_time"] = ndt * 48
 
-    nctime = defVar(ds,"valid_time",Int64,("valid_time",),attrib = Dict(
+    nctime = defVar(ds,"valid_time",Float32,("valid_time",),attrib = Dict(
         "units"     => "hours since $(tbd.start) 00:00:00.0",
         "long_name" => "time",
         "calendar"  => "gregorian",
