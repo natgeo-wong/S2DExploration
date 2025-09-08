@@ -71,7 +71,7 @@ for istn = 1 : nstn
         "full_name"     => "Brightness Temperature",
     ))
 
-    nctime[:] = (collect(1:(48*ndt)) .- 1) ./ 2
+    nctime[:] = (collect(1:(48*ndt)) .- 0.5) ./ 2
     ncvar[:] = tbdata[:,:,istn][:]
 
     close(ds)
