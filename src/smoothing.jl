@@ -29,7 +29,7 @@ function smoothing!(
         data[idt] = sum(iidata.*weights)
     end
 
-    for idt = 1 : (ndt-2*buffer)
+    for idt = (ndt-2*buffer) : -1 : 1
         data[idt+buffer] = data[idt]
     end
 
@@ -53,7 +53,7 @@ function smoothing!(
         data[ilvl,idt] = sum(iidata.*weights)
     end
 
-    for idt = 1 : (ndt-2*buffer), ilvl = 1 : nlvl
+    for idt = (ndt-2*buffer) : -1 : 1, ilvl = 1 : nlvl
         data[ilvl,idt+buffer] = data[ilvl,idt]
     end
 
