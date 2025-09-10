@@ -1,7 +1,7 @@
-using DrWatson
-@quickactivate "S2DExploration"
 using ERA5Reanalysis
 using Statistics
+
+include(srcdir("common.jl"))
 
 function calculatebufferweights(shiftsteps)
 
@@ -61,5 +61,40 @@ function smoothing!(
     data[:,(ndt-buffer+1):end] .= NaN
 
     return
+
+end
+
+function smoothing(
+    e5ds :: ERA5Hourly,
+    evar :: SingleLevel;
+    ID   :: String,
+    days :: Int = 0
+)
+
+    ds  = read_climatology(ID,e5ds,evar)
+    var = ds[evar.ncID][:]
+    close(ds)
+
+    smoothing!(var,days=days)
+
+    save_climatology(ID,e5ds,evar,var,days=days)
+
+end
+
+function smoothing(
+    e5ds :: ERA5Hourly,
+    evar :: PressureLevel;
+    ID   :: String,
+    days :: Int = 0
+)
+
+    ds  = read_climatology(ID,e5ds,evar)
+    pre = ds["pressures"][:]
+    var = ds[evar.ncID][:,:]
+    close(ds)
+
+    smoothing!(var,days=days)
+
+    save_climatology(ID,e5ds,evar,var,pre,days=days)
 
 end
