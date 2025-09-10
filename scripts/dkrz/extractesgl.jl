@@ -32,34 +32,6 @@ for evar in esgllist
         close(gds)
     end
 
-    fnc = gID * "-" * evar.ID * "-" * ymd2str(e5ds.start) * "-" * ymd2str(e5ds.stop) * ".nc"
-    fnc = joinpath(e5ds.path,fnc)
-
-    if isfile(fnc); rm(fnc) end
-    ds = NCDataset(fnc,"c",attrib = Dict(
-        "Conventions" => "CF-1.6",
-        "history"     => "Created on $(Dates.now()) with ERA5Reanalysis.jl",
-        "comments"    => "ERA5Reanalysis.jl creates NetCDF files in the same format that data is saved on the Climate Data Store",
-        "doi"         => e5ds.sldoi
-    ))
-
-    ds.dim["valid_time"] = ndt * 24
-
-    nctime = defVar(ds,"valid_time",Int64,("valid_time",),attrib = Dict(
-        "units"     => "hours since $(e5ds.start) 00:00:00.0",
-        "long_name" => "time",
-        "calendar"  => "gregorian",
-    ))
-
-    ncvar = defVar(ds,evar.ID,Float64,("valid_time",),attrib = Dict(
-        "long_name"     => evar.long,
-        "full_name"     => evar.name,
-        "units"         => evar.units,
-    ))
-
-    nctime[:] = collect(1:(24*ndt)) .- 1
-    ncvar[:] = vmat
-
-    close(ds)
+    save_climatology(gID,e5ds,evar,vmat)
 
 end
