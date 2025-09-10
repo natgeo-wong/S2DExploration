@@ -30,7 +30,7 @@ function smoothing!(
     end
 
     for idt = 1 : (ndt-2*buffer)
-        data[idt+buffer] = data[idt,ilvl]
+        data[idt+buffer] = data[idt]
     end
 
     data[1:buffer] .= NaN
@@ -45,20 +45,20 @@ function smoothing!(
     days :: Int
 ) where FT <: Real
 
-    ndt,nlvl = size(data)
+    nlvl,ndt = size(data)
     buffer,weights = calculatebufferweights(days*24)
 
-    for ilvl = 1 : nlvl, idt = 1 : (ndt-2*buffer)
-        iidata = @views data[idt .+ (0:(2*buffer)),ilvl]
-        data[idt,ilvl] = sum(iidata.*weights)
+    for idt = 1 : (ndt-2*buffer), ilvl = 1 : nlvl
+        iidata = @views data[ilvl,idt.+(0:(2*buffer))]
+        data[ilvl,idt] = sum(iidata.*weights)
     end
 
-    for ilvl = 1 : nlvl, idt = 1 : (ndt-2*buffer)
-        data[idt+buffer,ilvl] = data[idt,ilvl]
+    for idt = 1 : (ndt-2*buffer), ilvl = 1 : nlvl
+        data[ilvl,idt+buffer] = data[ilvl,idt]
     end
 
-    data[1:buffer,:] .= NaN
-    data[(ndt-buffer+1):end,:] .= NaN
+    data[:,1:buffer] .= NaN
+    data[:,(ndt-buffer+1):end] .= NaN
 
     return
 
