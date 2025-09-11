@@ -1,9 +1,10 @@
 using DrWatson
 using Dierckx
+using ERA5Reanalysis
 using Statistics
 using Trapz
 
-include(srcdir("smoothing.jl"))
+include(srcdir("common.jl"))
 
 function calculate_ptrop(
     e5ds  :: ERA5Hourly;
@@ -53,13 +54,13 @@ function calculate_ωc(
 )
 
     evar  = PressureVariable("w")
-    ds = read_climatology(ID,e5ds,evar)
+    ds = read_climatology(ID,e5ds,evar,days=days)
     p = ds["pressures"][:]
     w = ds[evar.ncID][:,:]; ndt = size(t,2)
     close(ds)
 
     evar  = PressureVariable("sp")
-    ds = read_climatology(ID,e5ds,evar)
+    ds = read_climatology(ID,e5ds,evar,days=days)
     sp = ds[evar.ncID][:] / 100
     close(ds)
 
@@ -67,9 +68,6 @@ function calculate_ωc(
     ds = read_climatology(ID,e5ds,evar,days=days)
     ptrop = ds[evar.ncID][:] / 100
     close(ds)
-
-    if !iszero(days); smoothing!(w,days=days) end
-    if !iszero(days); smoothing!(sp,days=days) end
 
     nωc = 2; ωc = zeros(nωc+1,idt)
 
