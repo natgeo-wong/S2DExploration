@@ -63,7 +63,7 @@ function save_climatology(
     ds.dim["valid_time"] = ndt
 
     nctime = defVar(ds,"valid_time",Int64,("valid_time",),attrib = Dict(
-        "units"     => "hours since $(start) 00:00:00.0",
+        "units"     => "hours since $(e5ds.start) 00:00:00.0",
         "long_name" => "time",
         "calendar"  => "gregorian",
     ))
@@ -116,7 +116,7 @@ function save_climatology(
     ds.dim["valid_time"] = ndt
 
     nctime = defVar(ds,"valid_time",Int64,("valid_time",),attrib = Dict(
-        "units"     => "hours since $(start) 00:00:00.0",
+        "units"     => "hours since $(e5ds.start) 00:00:00.0",
         "long_name" => "time",
         "calendar"  => "gregorian",
     ))
