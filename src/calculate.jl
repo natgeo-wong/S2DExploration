@@ -1,6 +1,7 @@
 using DrWatson
 using Dierckx
 using ERA5Reanalysis
+using Logging
 using Statistics
 using Trapz
 
@@ -24,6 +25,7 @@ function calculate_ptrop(
 
     for idt = 1 : ndt
 
+        @info "$(now()) - S2DExploration - Calculating the atmospheric pressure at the tropopause for timestep $idt of $ndt for the ARM $ID station"; flush(stderr)
         iit = @views t[:,idt]
         spl = Spline1D(p,iit)
 
