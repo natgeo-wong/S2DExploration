@@ -15,17 +15,16 @@ function calculate_ptrop(
 
     evar  = PressureVariable("t")
     ds = read_climatology(ID,e5ds,evar,days=days)
-    p = ds["pressures"][:]; iip = (p.>=20) .& (p .<= 200)
+    p = ds["pressures"][:]; iip = (p.>=20) .& (p .<= 500)
     p = p[iip] * 100
     t = ds[evar.ncID][iip,:]; ndt = size(t,2)
     close(ds)
 
-    pp = 2000 : 100 : 20000; np = length(pp)
+    pp = 2000 : 100 : 50000; np = length(pp)
     dtdp = zeros(np); ptrop = zeros(ndt)
 
     for idt = 1 : ndt
 
-        @info "$(now()) - S2DExploration - Calculating the atmospheric pressure at the tropopause for timestep $idt of $ndt for the ARM $ID station"; flush(stderr)
         iit = @views t[:,idt]
         spl = Spline1D(p,iit)
 
