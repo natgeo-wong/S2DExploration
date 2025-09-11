@@ -1,0 +1,8 @@
+# SingleCustom
+# List of User-Defined Custom Single-Level Variables
+# (1) ERA5 ID, (2) Full Name, (3) Units, (4) Analysis, (5) Forecast, (6) Invariant, (7) CDS Name, (8) NetCDF ID, (9) MARS ID, (10) DKRZ ID
+
+ptrop,Atmospheric Pressure at Tropopause,Pa,false,false,false,tropopause_pressure,ptrop,missing,missing
+ω1,1st Vertical Mode of ω,Pa s**-1,false,false,false,1st_vertical_mode_component_of_omega,ω1,missing,missing
+ω2,2nd Vertical Mode of ω,Pa s**-1,false,false,false,2nd_vertical_mode_component_of_omega,ω2,missing,missing
+ωs,Shallow Mode of ω,Pa s**-1,false,false,false,shallow_mode_component_of_omega,ωs,missing,missing
