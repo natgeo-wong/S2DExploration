@@ -1,5 +1,6 @@
 using ERA5Reanalysis
 using Statistics
+import ERA5Reanalysis: smoothing
 
 include(srcdir("common.jl"))
 
