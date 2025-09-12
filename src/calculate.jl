@@ -56,27 +56,26 @@ function calculate_ωc(
     evar  = PressureVariable("w")
     ds = read_climatology(ID,e5ds,evar,days=days)
     p = ds["pressures"][:]
-    w = ds[evar.ncID][:,:]; ndt = size(t,2)
+    w = ds[evar.ncID][:,:]; ndt = size(w,2)
     close(ds)
 
-    evar  = PressureVariable("sp")
+    evar  = SingleVariable("sp")
     ds = read_climatology(ID,e5ds,evar,days=days)
     sp = ds[evar.ncID][:] / 100
     close(ds)
 
-    evar  = PressureVariable("ptrop")
+    evar  = SingleVariable("ptrop",path=srcdir())
     ds = read_climatology(ID,e5ds,evar,days=days)
     ptrop = ds[evar.ncID][:] / 100
     close(ds)
 
-    nωc = 2; ωc = zeros(nωc+1,idt)
-
+    nωc = 2; ωc = zeros(nωc+1,ndt)
 
     for idt = 1 : ndt
 
         ip = @views p[(p.>ptrop[idt]).&(p.<sp[idt])]
         iw = @views w[(p.>ptrop[idt]).&(p.<sp[idt]),idt]
-        ix = vcat(ip,sp)
+        ix = vcat(ip,sp[idt])
         iy = vcat(iw,0)
         spl = Spline1D(ix,iy)
         wspl = zeros(101)
