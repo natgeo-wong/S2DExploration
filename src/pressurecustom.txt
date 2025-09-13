@@ -1,0 +1,5 @@
+# PressureCustom
+# List of User-Defined Custom Pressure-Level Variables
+# (1) ERA5 ID, (2) Full Name, (3) Units, (4) Analysis, (5) Forecast, (6) Invariant, (7) CDS Name, (8) NetCDF ID, (9) MARS ID, (10) DKRZ ID
+
+dtdp,Gradient of Temperature over Pressure,K Pa**-1,false,false,false,gradient_of_temperature_over_pressure,dtdp,missing,missing

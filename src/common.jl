@@ -34,7 +34,7 @@ end
 function save_climatology(
     armID :: String,
     e5ds  :: ERA5Hourly,
-    evar  :: ERA5Variable,
+    evar  :: SingleLevel,
     data  :: Vector{<:Real};
     days  :: Int = 0
 )
@@ -84,7 +84,7 @@ end
 function save_climatology(
     armID :: String,
     e5ds  :: ERA5Hourly,
-    evar  :: ERA5Variable,
+    evar  :: PressureLevel,
     data  :: Matrix{<:Real},
     lvls  :: Vector{Int};
     days  :: Int = 0

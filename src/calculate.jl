@@ -7,6 +7,37 @@ using Trapz
 
 include(srcdir("common.jl"))
 
+function calculate_dtdp(
+    e5ds  :: ERA5Hourly;
+    ID    :: String,
+    days  :: Int = 0
+)
+
+    evar  = PressureVariable("t")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    p = ds["pressures"][:] * 100; np = length(p)
+    t = ds[evar.ncID][:,:]; ndt = size(t,2)
+    close(ds)
+
+    dtdp = zeros(np,ndt)
+
+    for idt = 1 : ndt
+
+        iit = @views t[:,idt]
+        spl = Spline1D(p,iit)
+
+        for ip in 1 : np
+            iipp = p[ip]
+            dtdp[ip,idt] = derivative(spl,iipp) * 9.81 * iipp / 287 / evaluate(spl,iipp)
+        end
+
+    end
+
+    evar = PressureVariable("dtdp",path=srcdir())
+    save_climatology(ID,e5ds,evar,dtdp,Int.(p./100),days=days)
+    
+end
+
 function calculate_ptrop(
     e5ds  :: ERA5Hourly;
     ID    :: String,
