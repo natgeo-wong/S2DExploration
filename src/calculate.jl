@@ -38,6 +38,39 @@ function calculate_dtdp(
     
 end
 
+function calculate_dtdp_hres(
+    e5ds  :: ERA5Hourly;
+    ID    :: String,
+    days  :: Int = 0
+)
+
+    evar  = PressureVariable("t")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    p = ds["pressures"][:] * 100
+    t = ds[evar.ncID][:,:]; ndt = size(t,2)
+    close(ds)
+
+    pp = 1000 : 1000 : 100000; np = length(pp)
+
+    dtdp = zeros(np,ndt)
+
+    for idt = 1 : ndt
+
+        iit = @views t[:,idt]
+        spl = Spline1D(p,iit)
+
+        for ip in 1 : np
+            iipp = pp[ip]
+            dtdp[ip,idt] = derivative(spl,iipp) * 9.81 * iipp / 287 / evaluate(spl,iipp)
+        end
+
+    end
+
+    evar = PressureVariable("dtdp_hres",path=srcdir())
+    save_climatology(ID,e5ds,evar,dtdp,Int.(pp./100),days=days)
+    
+end
+
 function calculate_ptrop(
     e5ds  :: ERA5Hourly;
     ID    :: String,
