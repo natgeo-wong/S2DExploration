@@ -73,29 +73,33 @@ function calculate_ωc(
 
     for idt = 1 : ndt
 
-        ip = @views p[(p.>ptrop[idt]).&(p.<sp[idt])]
-        iw = @views w[(p.>ptrop[idt]).&(p.<sp[idt]),idt]
-        ix = vcat(ip,sp[idt])
-        iy = vcat(iw,0)
-        spl = Spline1D(ix,iy)
-        wspl = zeros(101)
-        pspl = zeros(101)
-        pmin = minimum(ip)
+        if !isnan(sp[idt])
+            
+            ip = @views p[(p.>ptrop[idt]).&(p.<sp[idt])]
+            iw = @views w[(p.>ptrop[idt]).&(p.<sp[idt]),idt]
+            ix = vcat(ip,sp[idt])
+            iy = vcat(iw,0)
+            spl = Spline1D(ix,iy)
+            wspl = zeros(101)
+            pspl = zeros(101)
+            pmin = minimum(ip)
 
-        for ii = 1 : 100
+            for ii = 1 : 100
 
-            iip = pmin + (sp[idt]-pmin) * (ii-1) / 99
-            pspl[ii+1] = iip
-            wspl[ii+1] = evaluate(spl,iip)
+                iip = pmin + (sp[idt]-pmin) * (ii-1) / 99
+                pspl[ii+1] = iip
+                wspl[ii+1] = evaluate(spl,iip)
 
-        end
-        pspl[1] = ptrop[idt]
+            end
+            pspl[1] = ptrop[idt]
 
-        for ic = 1 : nωc
-            ωc[ic,idt] = trapz(
-                pspl .- pspl[1],
-                wspl .* sin.(ic*pi*(pspl .- pspl[1]) / (pspl[end] - pspl[1]))
-            ) * 2 / (pspl[end] - pspl[1])
+            for ic = 1 : nωc
+                ωc[ic,idt] = trapz(
+                    pspl .- pspl[1],
+                    wspl .* sin.(ic*pi*(pspl .- pspl[1]) / (pspl[end] - pspl[1]))
+                ) * 2 / (pspl[end] - pspl[1])
+            end
+
         end
 
     end
