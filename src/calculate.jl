@@ -15,7 +15,7 @@ function calculate_ptrop(
 
     evar  = PressureVariable("t")
     ds = read_climatology(ID,e5ds,evar,days=days)
-    p = ds["pressures"][:]; iip = (p.>=20) .& (p .<= 500)
+    p = ds["pressures"][:]; iip = (p.>=20) .& (p .<= 300)
     p = p[iip] * 100
     t = ds[evar.ncID][iip,:]; ndt = size(t,2)
     close(ds)
@@ -33,9 +33,9 @@ function calculate_ptrop(
             dtdp[ip] = derivative(spl,iipp) * 9.81 * iipp / 287 / evaluate(spl,iipp)
         end
 
-        ip = np; idtdp = dtdp[ip]
-        while idtdp > 0.002
-            ip -= 1
+        ip = 1; idtdp = dtdp[ip]
+        while idtdp < 0.002
+            ip += 1
             idtdp = dtdp[ip]
         end
         ptrop[idt] = pp[ip]
