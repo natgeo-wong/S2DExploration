@@ -74,7 +74,7 @@ function calculate_ωc(
     for idt = 1 : ndt
 
         if !isnan(sp[idt])
-            
+
             ip = @views p[(p.>ptrop[idt]).&(p.<sp[idt])]
             iw = @views w[(p.>ptrop[idt]).&(p.<sp[idt]),idt]
             ix = vcat(ip,sp[idt])
@@ -104,8 +104,8 @@ function calculate_ωc(
 
     end
 
-    evar = SingleVariable("ω1",path=srcdir()); save_climatology(ID,e5ds,evar,ωc[1,:])
-    evar = SingleVariable("ω2",path=srcdir()); save_climatology(ID,e5ds,evar,ωc[2,:])
-    # evar = SingleVariable("ωs",path=srcdir()); save_climatology(ID,e5ds,evar,ωc[3,:])
+    evar = SingleVariable("ω1",path=srcdir()); save_climatology(ID,e5ds,evar,ωc[1,:],days=days)
+    evar = SingleVariable("ω2",path=srcdir()); save_climatology(ID,e5ds,evar,ωc[2,:],days=days)
+    # evar = SingleVariable("ωs",path=srcdir()); save_climatology(ID,e5ds,evar,ωc[3,:],days=days)
     
 end
