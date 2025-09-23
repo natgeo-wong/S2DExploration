@@ -47,9 +47,12 @@ for idt = 1 : ndt
 
 end
 
+fol = joinpath(tbd.path,"timeseries-Tb")
+if !isdir(fol); mkpath(joinpath(tbd.path,"timeseries-Tb")) end
+
 for istn = 1 : nstn
 
-    fnc = joinpath(tbd.path,"$(geo.ID)_$(sID[istn])-Tb-$(Dates.format(tbd.start,dateformat"yyyymmdd"))-$(Dates.format(tbd.stop,dateformat"yyyymmdd")).nc")
+    fnc = joinpath(fol,"Tb-$(geo.ID)_$(sID[istn])-$(Dates.format(tbd.start,dateformat"yyyymmdd"))-$(Dates.format(tbd.stop,dateformat"yyyymmdd")).nc")
     if isfile(fnc); rm(fnc,force=true) end
 
     ds = NCDataset(fnc,"c",attrib = Dict(
