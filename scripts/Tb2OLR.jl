@@ -8,19 +8,19 @@ geo = GeoRegion("SGP",path=srcdir())
 tbd = TbDataset(start=Date(2001),stop=Date(2024,12,31),path=datadir())
 
 sinfo = readdlm(datadir("ARMstations_$(geo.ID).csv"),',',skipstart=1)[:,[1,5,6]]
-sID  = @views sinfo[:,1]
+sID  = @views sinfo[:,1]; nstn = length(sID)
 
 fol = joinpath(tbd.path,"timeseries-OLR")
 if !isdir(fol); mkpath(joinpath(tbd.path,"timeseries-OLR")) end
 
 for istn = 1 : nstn
 
-    ds = NCDataset(joinpath(fol,"Tb-$(geo.ID)_$(sID[istn])-$(Dates.format(tbd.start,dateformat"yyyymmdd"))-$(Dates.format(tbd.stop,dateformat"yyyymmdd")).nc"))
-    dt = ds["valid_time"].var[:]
+    ds = NCDataset(joinpath(tbd.path,"timeseries-Tb","Tb-$(geo.ID)_$(sID[istn])-$(Dates.format(tbd.start,dateformat"yyyymmdd"))-$(Dates.format(tbd.stop,dateformat"yyyymmdd")).nc"))
+    dt = ds["valid_time"].var[:]; ndt = length(dt)
     Tb = nomissing(ds["Tb"][:],NaN)
     close(ds)
 
-    fnc = joinpath(tbd.path,"timeseries-OLR","OLR-$(geo.ID)_$(sID[istn])-$(Dates.format(tbd.start,dateformat"yyyymmdd"))-$(Dates.format(tbd.stop,dateformat"yyyymmdd")).nc")
+    fnc = joinpath(fol,"OLR-$(geo.ID)_$(sID[istn])-$(Dates.format(tbd.start,dateformat"yyyymmdd"))-$(Dates.format(tbd.stop,dateformat"yyyymmdd")).nc")
     if isfile(fnc); rm(fnc,force=true) end
 
     ds = NCDataset(fnc,"c",attrib = Dict(
@@ -28,7 +28,7 @@ for istn = 1 : nstn
         "history"     => "Created on $(Dates.now())",
     ))
 
-    ds.dim["valid_time"] = ndt * 48
+    ds.dim["valid_time"] = ndt
 
     nctime = defVar(ds,"valid_time",Float32,("valid_time",),attrib = Dict(
         "units"     => "hours since $(tbd.start) 00:00:00.0",
