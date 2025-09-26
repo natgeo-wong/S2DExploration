@@ -173,4 +173,4 @@ function calculate_ωc(
     
 end
 
-tb2OLR(tb::Real) = 5.67e-8 * (Tb * (1.228 - 1.106e-3*Tb))^4
+Tb2OLR(Tb::Real) = 5.67e-8 * (Tb * (1.228 - 1.106e-3*Tb))^4
