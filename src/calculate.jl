@@ -172,3 +172,5 @@ function calculate_ωc(
     # evar = SingleVariable("ωs",path=srcdir()); save_climatology(ID,e5ds,evar,ωc[3,:],days=days)
     
 end
+
+tb2OLR(tb::Real) = 5.67e-8 * (Tb * (1.228 - 1.106e-3*Tb))^4
