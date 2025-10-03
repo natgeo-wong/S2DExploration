@@ -205,8 +205,9 @@ function calculate_ptbl(
         ip = vcat(p[(p.<isp)],isp)
         iz = vcat(z[(p.<isp),idt],0)
 
-        spl = Spline1D(reverse(iz),reverse(ip))
-        ptbl[idt] = spl(blh[idt])
+        spl = Spline1D(reverse(iz),reverse(ip),k=1)
+        iptbl = spl(blh[idt])
+        ptbl[idt] = iptbl > isp ? isp : iptbl
 
     end
 
@@ -249,7 +250,7 @@ function calculate_utbl(
         ip = vcat(p[(p.<isp)],    isp)
         iu = vcat(u[(p.<isp),idt],u10[idt])
 
-        spl = Spline1D(ip,iu)
+        spl = Spline1D(ip,iu,k=1)
         utbl[idt] = spl(ptbl[idt])
 
     end
@@ -294,7 +295,7 @@ function calculate_vtbl(
         ip = vcat(p[(p.<isp)],    isp)
         iv = vcat(v[(p.<isp),idt],v10[idt])
 
-        spl = Spline1D(ip,iv)
+        spl = Spline1D(ip,iv,k=1)
         vtbl[idt] = spl(ptbl[idt])
 
     end
