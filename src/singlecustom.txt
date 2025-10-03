@@ -6,3 +6,8 @@ ptrop,Atmospheric Pressure at Tropopause,Pa,false,false,false,tropopause_pressur
 ω1,1st Vertical Mode of ω,Pa s**-1,false,false,false,1st_vertical_mode_component_of_omega,ω1,missing,missing
 ω2,2nd Vertical Mode of ω,Pa s**-1,false,false,false,2nd_vertical_mode_component_of_omega,ω2,missing,missing
 ωs,Shallow Mode of ω,Pa s**-1,false,false,false,shallow_mode_component_of_omega,ωs,missing,missing
+ptbl,Pressure at Top of Boundary Layer,Pa,false,false,false,pressure_at_top_of_boundary_layer,ptbl,missing,missing
+utbl,Zonal Wind at Top of Boundary Layer,Pa,false,false,false,zonal_wind_at_top_of_boundary_layer,utbl,missing,missing
+vtbl,Meridional Wind at Top of Boundary Layer,Pa,false,false,false,meridional_wind_at_top_of_boundary_layer,vtbl,missing,missing
+ubl,Mean Boundary Layer Zonal Wind,Pa,false,false,false,mean_zonal_wind_in_boundary_layer,ubl,missing,missing
+vbl,Mean Boundary Layer Meridional Wind,Pa,false,false,false,mean_meridional_wind_in_boundary_layer,vbl,missing,missing,vbl,missing,missing

@@ -174,3 +174,232 @@ function calculate_ωc(
 end
 
 Tb2OLR(Tb::Real) = 5.67e-8 * (Tb * (1.228 - 1.106e-3*Tb))^4
+
+function calculate_ptbl(
+    e5ds  :: ERA5Hourly;
+    ID    :: String,
+    days  :: Int = 0
+)
+
+    evar = PressureVariable("z")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    p = ds["pressures"][:] * 100
+    z = ds[evar.ncID][:,:] ./ 9.80665; ndt = size(z,2)
+    close(ds)
+
+    evar = SingleVariable("sp")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    sp = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("blh")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    blh = ds[evar.ncID][:]
+    close(ds)
+    
+    ptbl = zeros(ndt)
+
+    for idt = 1 : ndt
+
+        isp = sp[idt]
+        ip = vcat(p[(p.<isp)],isp)
+        iz = vcat(z[(p.<isp),idt],0)
+
+        spl = Spline1D(reverse(iz),reverse(ip))
+        ptbl[idt] = spl(blh[idt])
+
+    end
+
+    save_climatology(ID,e5ds,SingleVariable("ptbl",path=srcdir()),ptbl,days=days)
+
+end
+
+function calculate_utbl(
+    e5ds  :: ERA5Hourly;
+    ID    :: String,
+    days  :: Int = 0
+)
+
+    evar = PressureVariable("u")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    p = ds["pressures"][:] * 100
+    u = ds[evar.ncID][:,:]; ndt = size(u,2)
+    close(ds)
+
+    evar = SingleVariable("u10")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    u10 = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("ptbl",path=srcdir())
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    ptbl = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("sp")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    sp = ds[evar.ncID][:]
+    close(ds)
+    
+    utbl = zeros(ndt)
+
+    for idt = 1 : ndt
+
+        isp = sp[idt]
+        ip = vcat(p[(p.<isp)],    isp)
+        iu = vcat(u[(p.<isp),idt],u10[idt])
+
+        spl = Spline1D(ip,iu)
+        utbl[idt] = spl(ptbl[idt])
+
+    end
+
+    save_climatology(ID,e5ds,SingleVariable("utbl",path=srcdir()),utbl,days=days)
+
+
+end
+
+function calculate_vtbl(
+    e5ds  :: ERA5Hourly;
+    ID    :: String,
+    days  :: Int = 0
+)
+
+    evar = PressureVariable("v")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    p = ds["pressures"][:] * 100
+    v = ds[evar.ncID][:,:]; ndt = size(v,2)
+    close(ds)
+
+    evar = SingleVariable("v10")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    v10 = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("ptbl",path=srcdir())
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    ptbl = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("sp")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    sp = ds[evar.ncID][:]
+    close(ds)
+    
+    vtbl = zeros(ndt)
+
+    for idt = 1 : ndt
+
+        isp = sp[idt]
+        ip = vcat(p[(p.<isp)],    isp)
+        iv = vcat(v[(p.<isp),idt],v10[idt])
+
+        spl = Spline1D(ip,iv)
+        vtbl[idt] = spl(ptbl[idt])
+
+    end
+
+    save_climatology(ID,e5ds,SingleVariable("vtbl",path=srcdir()),vtbl,days=days)
+
+
+end
+
+function calculate_ubl(
+    e5ds  :: ERA5Hourly;
+    ID    :: String,
+    days  :: Int = 0
+)
+
+    evar = PressureVariable("u")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    p = ds["pressures"][:] * 100
+    u = ds[evar.ncID][:,:]; ndt = size(u,2)
+    close(ds)
+
+    evar = SingleVariable("u10")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    u10 = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("utbl",path=srcdir())
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    utbl = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("ptbl",path=srcdir())
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    ptbl = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("sp")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    sp = ds[evar.ncID][:]
+    close(ds)
+    
+    ubl = zeros(ndt)
+
+    for idt = 1 : ndt
+
+        isp = sp[idt]
+        iptbl = ptbl[idt]
+        ip = vcat(ptbl[idt],p[(p.<isp).&(p.>iptbl)],    isp); np = length(ip)
+        iu = vcat(utbl[idt],u[(p.<isp).&(p.>iptbl),idt],u10[idt])
+
+        ubl[idt] = trapz(ip,iu) / trapz(ip,ones(np))
+
+    end
+
+    save_climatology(ID,e5ds,SingleVariable("ubl",path=srcdir()),ubl,days=days)
+
+
+end
+
+function calculate_vbl(
+    e5ds  :: ERA5Hourly;
+    ID    :: String,
+    days  :: Int = 0
+)
+
+    evar = PressureVariable("v")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    p = ds["pressures"][:] * 100
+    v = ds[evar.ncID][:,:]; ndt = size(v,2)
+    close(ds)
+
+    evar = SingleVariable("v10")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    v10 = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("vtbl",path=srcdir())
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    vtbl = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("ptbl",path=srcdir())
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    ptbl = ds[evar.ncID][:]
+    close(ds)
+
+    evar = SingleVariable("sp")
+    ds = read_climatology(ID,e5ds,evar,days=days)
+    sp = ds[evar.ncID][:]
+    close(ds)
+    
+    vbl = zeros(ndt)
+
+    for idt = 1 : ndt
+
+        isp = sp[idt]
+        iptbl = ptbl[idt]
+        ip = vcat(ptbl[idt],p[(p.<isp).&(p.>iptbl)],    isp); np = length(ip)
+        iv = vcat(vtbl[idt],v[(p.<isp).&(p.>iptbl),idt],v10[idt])
+
+        vbl[idt] = trapz(ip,iv) / trapz(ip,ones(np))
+
+    end
+
+    save_climatology(ID,e5ds,SingleVariable("vbl",path=srcdir()),vbl,days=days)
+
+
+end
