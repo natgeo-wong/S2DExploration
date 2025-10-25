@@ -1,0 +1,10 @@
+[project]
+name = "s2dexploration"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "marimo>=0.17.2",
+    "ultraplot>=1.63.0",
+]
