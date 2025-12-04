@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.18
+# v0.20.21
 
 using Markdown
 using InteractiveUtils
@@ -137,7 +137,7 @@ end
 dtbeg = Date(2001,7)
 
 # ╔═╡ c2176f38-e2e2-4bfb-85e6-5e2f77fd1cf4
-dtend = Date(2001,7,10)
+dtend = Date(2001,7,11)
 
 # ╔═╡ 634c8c07-1aac-4763-86ae-b2b13519164a
 begin
@@ -252,21 +252,44 @@ begin
 	close(nds)
 end
 
+# ╔═╡ ff63d2f8-17d0-4748-9fd2-db2a9c617ffb
+begin
+	ends = read_climatology("$(armsite)_TST",e5ds,evar)
+	endt = ends["valid_time"][:]
+	nvar = ends[evar.ncID][:,:] / -3600
+	close(ends)
+	md"Loading Single-Level Variable: $(evar.ID)"
+end
+
 # ╔═╡ 0b11ca14-4b4d-464d-8c77-c9823e9b376c
 begin
 	f3 = Figure()
 	
 	ax3_1 = Axis(
-		f3[1,1],width=400,height=200,yticks=100:50:350,xlabel="Date",
-		ylabel=L"OLR / W m$^{-2}$",yminorticks=50:10:350,yminorticksvisible=true,
+		f3[1,1],width=400,height=200,
+		xlabel="Date",xticks=0:48:480,xminorticks=0:12:480,xticklabelsvisible=false,
+		ylabel=L"OLR / W m$^{-2}$",yticks=100:50:350,yminorticks=50:10:350,
+		xminorticksvisible=true,yminorticksvisible=true,
 	)
 
-	for ipnt = 1 : npnt
-		lines!(ax3_1,ndt[ii],aolr[ipnt,ii],color=:grey,linewidth=1)
-	end
-	lines!(ax3_1,ndt[ii],μolr[ii],label="NASA",color=:black,linewidth=3)
-	lines!(ax3_1,edt[jj],var[jj],label="ERA5",color=:blue,linewidth=3)
-	xlims!(ax3_1,dtbeg,dtend)
+	band!(
+		ax3_1,(1:sum(ii))./2 .- 0.25,
+		dropdims(minimum(aolr[:,ii],dims=1),dims=1),
+		dropdims(maximum(aolr[:,ii],dims=1),dims=1),
+		color=:black,alpha=0.5,#linewidth=3
+	)
+	lines!(
+		ax3_1,(1:sum(ii))./2 .- 0.25,
+		μolr[ii],label="NASA",color=:black,linewidth=3
+	)
+	band!(
+		ax3_1,(1:sum(jj)) .-0.5,
+		dropdims(minimum(nvar[:,jj],dims=1),dims=1),
+		dropdims(maximum(nvar[:,jj],dims=1),dims=1),
+		color=:cyan,alpha=0.6,#linewidth=3
+	)
+	lines!(ax3_1,(1:sum(jj)) .-0.5,var[jj],label="ERA5",color=:blue,linewidth=3)
+	xlims!(ax3_1,0,sum(jj))
 	ylims!(ax3_1,75,350)
 
 	axislegend(position=:lb,framevisible=:false)
@@ -318,5 +341,6 @@ CairoMakie.save(plotsdir("02g-OLRcomparison.png"),f3)
 # ╟─c93925c4-8d9c-4313-bfde-3b45bed721ae
 # ╟─8bde2ae9-60ae-4706-b585-26a4a5c3c835
 # ╟─5bb4c5da-1fe4-4ce4-8736-451117dc13f6
+# ╟─ff63d2f8-17d0-4748-9fd2-db2a9c617ffb
 # ╟─0b11ca14-4b4d-464d-8c77-c9823e9b376c
 # ╟─5421f7e1-83a4-4e1d-b237-3f969f60e1a5
