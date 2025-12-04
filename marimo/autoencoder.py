@@ -75,27 +75,6 @@ def _(fol, geoID, nc, os):
     return dtv, pre, q, t, w
 
 
-@app.cell
-def _(dtv):
-    dtv.size
-    return
-
-
-@app.cell(hide_code=True)
-def _(dtv, np, pre, q, t, uplt, w):
-    uplt.close(); fig,axs = uplt.subplots(nrows=3,aspect=2)
-
-    axs[0].contourf(dtv[0:500],pre,w[0:500,:].T,levels=np.arange(-.5,.5,0.1),extend="both")
-    axs[1].contourf(dtv[0:500],pre,t[0:500,:].T)
-    axs[2].contourf(dtv[0:500],pre,q[0:500,:].T)
-
-    for ax1 in axs:
-        ax1.format(ylim=(1000,1))
-
-    fig
-    return
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -105,30 +84,59 @@ def _(mo):
 
 
 @app.cell
-def _(nn):
-    class SampleNN(nn.Module):
-        def __init__(self, input_size, hidden_size, output_size):
-            super(SampleNN, self).__init__()
-            # 1st Layer: Maps inputs to a hidden layer of size 'hidden_size'
-            self.fc1 = nn.Linear(input_size, hidden_size)
-            # Non-linear activation function (essential for an ANN!)
-            self.relu = nn.ReLU()
-            # 1st Layer: Maps inputs to a hidden layer of size 'hidden_size'
-            self.fc2 = nn.Linear(hidden_size, hidden_size)
-            # Non-linear activation function (essential for an ANN!)
-            self.relu = nn.ReLU()
-            # 2nd Layer (Output): Maps the hidden layer to the final output (1 logit for binary classification)
-            self.fc3 = nn.Linear(hidden_size, output_size)
+def _(Autoencoder, nn):
+    class SampleAE(nn.Module):
+        def __init__(self, input_dim, latent_dim):
+            super(Autoencoder, self).__init__()
+
+            # Encoder: Takes the input (8 features) and compresses it to the latent space (3 features)
+            self.encoder = nn.Sequential(
+                nn.Linear(input_dim, 5),
+                nn.ReLU(),
+                nn.Linear(5, latent_dim) # The bottleneck layer
+            )
+
+            # Decoder: Takes the latent code (3 features) and reconstructs the original input (8 features)
+            self.decoder = nn.Sequential(
+                nn.Linear(latent_dim, 5),
+                nn.ReLU(),
+                nn.Linear(5, input_dim) # Output layer matches input dimension
+            )
 
         def forward(self, x):
-            # Pass through the first layer, apply ReLU, and then pass to the output layer
-            out = self.fc1(x)
-            out = self.relu(out)
-            out = self.fc2(out)
-            out = self.relu(out)
-            out = self.fc3(out)
-            return out
-    return (SampleNN,)
+            # 1. Encoding: Convert input into a compressed latent representation
+            encoded = self.encoder(x)
+            # 2. Decoding: Reconstruct the input from the latent representation
+            decoded = self.decoder(encoded)
+            return decoded, encoded # Return both the reconstruction and the latent code
+    return (SampleAE,)
+
+
+@app.cell
+def _(Autoencoder, input_dim, latent_dim, nn):
+    class SampleEncoder(nn.Module):
+        def __init__(self, input_dim, latent_dim):
+            super(Autoencoder, self).__init__()
+
+            # Encoder: Takes the input (8 features) and compresses it to the latent space (3 features)
+            self.encoder = nn.Sequential(
+                nn.Linear(input_dim, 5),
+                nn.ReLU(),
+                nn.Linear(5, latent_dim) # The bottleneck layer
+            )
+
+            # Decoder: Takes the latent code (3 features) and reconstructs the original input (8 features)
+            self.decoder = nn.Sequential(
+                nn.Linear(latent_dim, 5),
+                nn.ReLU(),
+                nn.Linear(5, input_dim) # Output layer matches input dimension
+            )
+
+        def forward(self, x):
+            nn.Linear(input_dim, 5),
+            nn.ReLU(),
+            nn.Linear(5, latent_dim)
+    return
 
 
 @app.cell
@@ -156,33 +164,35 @@ def _(np, nt, q, t, torch, w):
 
 
 @app.cell
-def _(np, nt, q, t, torch):
-    X2 = torch.tensor(
-        # ((w - np.mean(w,axis=0)) / np.std(w))[nt:,:],
-        np.concatenate((
-            (t - np.mean(t,axis=0)) / np.std(t),
-            (q - np.mean(q,axis=0)) / np.std(q),
-        #     (w - np.mean(w,axis=0)) / np.std(w)
-        ),axis=1)[nt:,:],
-        dtype=torch.float32
-    )
+def _(torch):
+    # --- 2. Create Dummy Data (Unsupervised: Target y = Input X) ---
+    # We use 8 features to demonstrate the dimensionality reduction to the latent space (3 features).
+    INPUT_SIZE = 8
+    LATENT_SIZE = 3 # The bottleneck dimension
+    N_SAMPLES = 10
+    EPOCHS = 1000
+
+    # Create random input data
+    torch.manual_seed(42) # For reproducible results
+    return EPOCHS, INPUT_SIZE, LATENT_SIZE, N_SAMPLES
+
+
+@app.cell
+def _(INPUT_SIZE, N_SAMPLES, torch):
+    X2 = torch.randn(N_SAMPLES, INPUT_SIZE, dtype=torch.float32)
     return (X2,)
 
 
 @app.cell
-def _():
-    # Parameters
-    INPUT_SIZE = 37 * 2
-    HIDDEN_SIZE = 50
-    OUTPUT_SIZE = 37
-    EPOCHS = 1000
-    return EPOCHS, HIDDEN_SIZE, INPUT_SIZE, OUTPUT_SIZE
+def _(X2):
+    X2
+    return
 
 
 @app.cell
-def _(HIDDEN_SIZE, INPUT_SIZE, OUTPUT_SIZE, SampleNN):
+def _(INPUT_SIZE, LATENT_SIZE, SampleAE):
     # Instantiate the model
-    model = SampleNN(INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE)
+    model = SampleAE(INPUT_SIZE, LATENT_SIZE)
     return (model,)
 
 
@@ -221,18 +231,6 @@ def _(EPOCHS, X, criterion, model, optimizer, torch, y):
 
 
 @app.cell
-def _(X2, model):
-    wtest = model(X2)
-    return (wtest,)
-
-
-@app.cell
-def _(np, w, wtest):
-    wtest2 = wtest.detach().numpy() * np.std(w) + np.mean(w,axis=0)
-    return (wtest2,)
-
-
-@app.cell
 def _(dtv, np, nt, pre, uplt, w, wtest2):
     uplt.close(); f2,a2 = uplt.subplots(nrows=3,aspect=3)
 
@@ -252,37 +250,6 @@ def _(dtv, np, nt, pre, uplt, w, wtest2):
     p2_1.format(xlim=(-0.05,0.05))
 
     f2
-    return
-
-
-@app.cell
-def _(np, w, wtest):
-    wtest.detach().numpy() - np.mean(w[:-1,:],keepdims=True)
-    return
-
-
-@app.cell(disabled=True)
-def _(X, model, torch, y):
-    # Put model in evaluation mode (important for production/testing)
-    model.eval() 
-    with torch.no_grad(): # Disable gradient calculation for efficiency
-        final_logits = model(X)
-        final_predictions = torch.round(torch.sigmoid(final_logits))
-
-        print(f"Input X:\n{X}")
-        print(f"True Labels (y):\n{y.T}")
-        print(f"Predicted Labels:\n{final_predictions.T}")
-
-        # Test new input
-        test_input = torch.tensor([[0.5, 0.5]], dtype=torch.float32)
-        test_logit = model(test_input).item()
-        test_prob = torch.sigmoid(torch.tensor(test_logit)).item()
-        test_class = round(test_prob)
-
-        print("\n--- Prediction for [0.5, 0.5] ---")
-        print(f"Logit: {test_logit:.2f}")
-        print(f"Probability of Class 1: {test_prob:.2f}")
-        print(f"Predicted Class: {test_class}")
     return
 
 

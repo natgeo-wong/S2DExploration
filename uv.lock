@@ -1024,6 +1024,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "marimo" },
+    { name = "matplotlib" },
     { name = "netcdf4" },
     { name = "numpy" },
     { name = "scipy" },
@@ -1034,6 +1035,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "marimo", specifier = ">=0.17.2" },
+    { name = "matplotlib", specifier = ">=3.10.7" },
     { name = "netcdf4", specifier = ">=1.7.3" },
     { name = "numpy", specifier = ">=2.3.4" },
     { name = "scipy", specifier = ">=1.16.2" },
