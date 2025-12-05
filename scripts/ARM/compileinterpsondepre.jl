@@ -58,7 +58,10 @@ close(ds)
 mat_monthly = reshape(mat_monthly,332,60,24,12)
 mat_monthly = dropdims(mean(mat_monthly,dims=2),dims=2)
 
-fnc = joinpath(ads.path,"monthhour-$(varID)-$(ymd2str(ads.start))_$(ymd2str(ads.stop))")
+fnc = joinpath(
+    ads.path,
+    "monthhour-$(varID)-$(ymd2str(ads.start))_$(ymd2str(ads.stop)).nc"
+)
 if isfile(fnc); rm(fnc,force=true) end
 
 ds = NCDataset(fnc,"c",attrib = Dict(
