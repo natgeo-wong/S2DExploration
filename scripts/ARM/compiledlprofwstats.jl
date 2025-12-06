@@ -18,20 +18,24 @@ dtvec = ads.start : Day(1) : ads.stop
 varID = "w"
 
 for idt in dtvec
-    ids = read(ads,idt,throw=false)
-    if !isnothing(ids)
-        if !isleapyear(idt)
-            if month(idt) > 2
-                ii = dayofyear(idt) + 1
+    try 
+        ids = read(ads,idt,throw=false)
+        if !isnothing(ids)
+            if !isleapyear(idt)
+                if month(idt) > 2
+                    ii = dayofyear(idt) + 1
+                else
+                    ii = dayofyear(idt)
+                end
             else
                 ii = dayofyear(idt)
             end
-        else
-            ii = dayofyear(idt)
+            mat[:,:,ii] .+= nomissing(ids[varID][:,:],0)
+            count[:,:,ii] += .!isnan.(nomissing(ids[varID][:,:],NaN))
+            close(ids)
         end
-        mat[:,:,ii] .+= nomissing(ids[varID][:,:],0)
-        count[:,:,ii] += .!isnan.(nomissing(ids[varID][:,:],NaN))
-        close(ids)
+    catch
+        @warn "reading file for $idt didn't work"
     end
 end
 
