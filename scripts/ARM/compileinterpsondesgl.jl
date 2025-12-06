@@ -41,7 +41,7 @@ mat_monthly = zeros(1440,12)
 
 for imo = 1 : 12
     ndy = daysinmonth(Date(2004,imo))
-    ii = dayofyear(Date(2004,imo,1)) : dayofyear(Date(2004,imo,))
+    ii = dayofyear(Date(2004,imo,1)) : dayofyear(Date(2004,imo,ndy))
     matii = @views mat[:,ii]
     if imo != 2
         mat_monthly[:,imo] = mean(matii,dims=2)

@@ -8,14 +8,14 @@ using Statistics
 include(srcdir("common.jl"))
 
 ads = ARMDataset(
-    stream = "sgpinterpolatedsondeC1.c1",
+    stream = "sgpdlprofwstats4newsC1.c1",
     start = Date(2000), stop = Date(2024,12,31), path = datadir()
 )
 
-mat = zeros(332,1440,366)
-count = zeros(332,1440,366)
+mat = zeros(133,144,366)
+count = zeros(133,144,366)
 dtvec = ads.start : Day(1) : ads.stop
-varID = "temp"
+varID = "w"
 
 for idt in dtvec
     ids = read(ads,idt,throw=false)
@@ -37,7 +37,7 @@ end
 
 mat ./= count
 
-mat_monthly = zeros(332,1440,12)
+mat_monthly = zeros(133,1440,12)
 
 for imo = 1 : 12
     ndy = daysinmonth(Date(2004,imo))
@@ -55,7 +55,7 @@ z  = ds["height"][:]
 varDict = Dict(ds[varID].attrib)
 close(ds)
 
-mat_monthly = reshape(mat_monthly,332,60,24,12)
+mat_monthly = reshape(mat_monthly,332,6,24,12)
 mat_monthly = dropdims(mean(mat_monthly,dims=2),dims=2)
 
 fnc = joinpath(
@@ -71,7 +71,7 @@ ds = NCDataset(fnc,"c",attrib = Dict(
 
 ds.dim["month"] = 12
 ds.dim["valid_time"] = 24
-ds.dim["levels"] = 332
+ds.dim["levels"] = 133
 
 ncz = defVar(ds,"height",Float64,("levels",),attrib = Dict(
     "units"     => "km",
