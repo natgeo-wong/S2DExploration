@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.21
+# v0.20.19
 
 using Markdown
 using InteractiveUtils
@@ -298,7 +298,7 @@ begin
 	f3 = Figure()
 	
 	ax3_1 = Axis(
-		f3[1,1],width=500,height=200,ylabel="Pressure / hPa",
+		f3[1,1],width=300,height=200,ylabel="Pressure / hPa",
 		xticksvisible=false,xticklabelsvisible=false,
 		# yscale=log10,yticks=[10,100,1000]
 	)
@@ -308,7 +308,7 @@ begin
 	ylims!(ax3_1,1000,10)
 	
 	ax3_2 = Axis(
-		f3[2,1],width=500,height=200,ylabel="Pressure / hPa",
+		f3[2,1],width=300,height=200,ylabel="Pressure / hPa",
 		xticksvisible=false,xticklabelsvisible=false,
 		# yscale=log10,yticks=[10,100,1000]
 	)
@@ -456,7 +456,7 @@ end
 # ╟─d3ea47b6-0570-4ad5-b3a2-c48a338c5dc6
 # ╠═7cf5b637-8443-45b3-91db-781f01f75810
 # ╠═c2176f38-e2e2-4bfb-85e6-5e2f77fd1cf4
-# ╠═9b857d52-fab4-4b14-a58a-adcf9aee96b2
+# ╟─9b857d52-fab4-4b14-a58a-adcf9aee96b2
 # ╟─52d92463-ad3c-42e1-a5bf-4d3ab32a2f82
 # ╠═8e2035d1-b0a1-44a0-a561-7080d5de1d09
 # ╟─55359eaf-c193-483b-8f59-6ba83a0e636a
@@ -469,7 +469,7 @@ end
 # ╟─c60abbd1-f294-4500-b147-38b0ebf0e0fd
 # ╟─754b0c91-4b8e-44b4-a177-23dcef174234
 # ╟─a7881efe-d51c-4862-b127-b47521008958
-# ╟─15d830de-0fc7-4d09-8cdd-0081d8b17e0b
+# ╠═15d830de-0fc7-4d09-8cdd-0081d8b17e0b
 # ╟─2dfd4e50-c9d5-40a6-be3b-d9ec2bf9c4ea
 # ╟─21527955-d742-419d-b2e3-53a7cf909158
 # ╟─61f401ef-182e-4298-a15d-61381f3b861c
