@@ -18,21 +18,21 @@ end
 
 # ╔═╡ 5692ccd8-6056-11f0-07da-d1ae989cdac1
 begin
-	using Pkg; Pkg.activate()
-	using DrWatson
+    using Pkg; Pkg.activate()
+    using DrWatson
 end
 
 # ╔═╡ bd5e50c0-5d29-410e-8389-beb8b636307d
 begin
-	@quickactivate "S2DExploration"
-	using PlutoUI
-	using Dates, DelimitedFiles, StatsBase
-	using GeoRegions, ERA5Reanalysis
-	using CairoMakie, LaTeXStrings
-	set_theme!(theme_latexfonts())
+    @quickactivate "S2DExploration"
+    using PlutoUI
+    using Dates, DelimitedFiles, StatsBase
+    using GeoRegions, ERA5Reanalysis
+    using CairoMakie, LaTeXStrings
+    set_theme!(theme_latexfonts())
 
-	include(srcdir("smoothing.jl"))
-	md"Activating Project Environment for S2DExploration ..."
+    include(srcdir("smoothing.jl"))
+    md"Activating Project Environment for S2DExploration ..."
 end
 
 # ╔═╡ 618eccb3-457c-4530-8d33-4be497967800
@@ -50,8 +50,8 @@ md"
 
 # ╔═╡ 8a43991e-cf8e-4304-9d0e-f235a0da1f36
 @bind armsite Select([
-	"SGP" => "(SGP) Southern Great Plains",
-	"BNF" => "(BNF) Bankhead National Forest",
+    "SGP" => "(SGP) Southern Great Plains",
+    "BNF" => "(BNF) Bankhead National Forest",
 ])
 
 # ╔═╡ e282e373-f8a9-4a11-b1a7-e1d270b14090
@@ -81,20 +81,20 @@ md"
 
 # ╔═╡ a0757349-bf33-41bf-952e-723d874b9dcc
 begin
-	ds = read_climatology(armsite,e5ds,ptbl_var)
-	dtv = ds["valid_time"][:]
-	ptbl = ds[ptbl_var.ncID][:]
-	close(ds)
-	ds = read_climatology(armsite,e5ds,sp_var)
-	sp = ds[sp_var.ncID][:]
-	close(ds)
-	ds = read_climatology(armsite,e5ds,pbl_var)
-	pbl = ds[pbl_var.ncID][:]
-	close(ds)
-	ds = read_climatology(armsite,e5ds,blh_var)
-	blh = ds[blh_var.ncID][:]
-	close(ds)
-	md"Loading ERA5 Data"
+    ds = read_climatology(armsite,e5ds,ptbl_var)
+    dtv = ds["valid_time"][:]
+    ptbl = ds[ptbl_var.ncID][:]
+    close(ds)
+    ds = read_climatology(armsite,e5ds,sp_var)
+    sp = ds[sp_var.ncID][:]
+    close(ds)
+    ds = read_climatology(armsite,e5ds,pbl_var)
+    pbl = ds[pbl_var.ncID][:]
+    close(ds)
+    ds = read_climatology(armsite,e5ds,blh_var)
+    blh = ds[blh_var.ncID][:]
+    close(ds)
+    md"Loading ERA5 Data"
 end
 
 # ╔═╡ 7cf5b637-8443-45b3-91db-781f01f75810
@@ -105,26 +105,26 @@ dtend = Date(2011,4)
 
 # ╔═╡ c5bfe5af-2b16-4d5a-bf05-976b54915bea
 begin
-	ii = (dtv .>= dtbeg) .& (dtv .<= dtend)
-	f1 = Figure()
+    ii = (dtv .>= dtbeg) .& (dtv .<= dtend)
+    f1 = Figure()
 
-	ax1_1 = Axis(
-		f1[1,1],width=500,height=100,ylabel="Pressure / hPa",
-		# yscale=log10
-	)
+    ax1_1 = Axis(
+        f1[1,1],width=500,height=100,ylabel="Pressure / hPa",
+        # yscale=log10
+    )
 
-	ax1_2 = Axis(
-		f1[2,1],width=500,height=100,ylabel="Height / m",
-	)
+    ax1_2 = Axis(
+        f1[2,1],width=500,height=100,ylabel="Height / m",
+    )
 
-	lines!(ax1_1,dtv[ii],abs.(ptbl[ii]))
-	lines!(ax1_1,dtv[ii],abs.(sp[ii]))
-	lines!(ax1_1,dtv[ii],abs.(pbl[ii]))
-	lines!(ax1_2,dtv[ii],blh[ii])
-	# ylims!(ax1_1,1010,900)
+    lines!(ax1_1,dtv[ii],abs.(ptbl[ii]))
+    lines!(ax1_1,dtv[ii],abs.(sp[ii]))
+    lines!(ax1_1,dtv[ii],abs.(pbl[ii]))
+    lines!(ax1_2,dtv[ii],blh[ii])
+    # ylims!(ax1_1,1010,900)
 
-	resize_to_layout!(f1)
-	f1
+    resize_to_layout!(f1)
+    f1
 end
 
 # ╔═╡ Cell order:

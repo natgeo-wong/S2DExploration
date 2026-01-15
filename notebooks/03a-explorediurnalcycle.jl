@@ -18,22 +18,22 @@ end
 
 # ╔═╡ 5692ccd8-6056-11f0-07da-d1ae989cdac1
 begin
-	using Pkg; Pkg.activate()
-	using DrWatson
+    using Pkg; Pkg.activate()
+    using DrWatson
 end
 
 # ╔═╡ bd5e50c0-5d29-410e-8389-beb8b636307d
 begin
-	@quickactivate "S2DExploration"
-	using PlutoUI
-	using Dates, DelimitedFiles, StatsBase
-	using GeoRegions, ERA5Reanalysis
-	using DataInterpolations
-	using CairoMakie, LaTeXStrings
-	set_theme!(theme_latexfonts())
+    @quickactivate "S2DExploration"
+    using PlutoUI
+    using Dates, DelimitedFiles, StatsBase
+    using GeoRegions, ERA5Reanalysis
+    using DataInterpolations
+    using CairoMakie, LaTeXStrings
+    set_theme!(theme_latexfonts())
 
-	include(srcdir("smoothing.jl"))
-	md"Activating Project Environment for S2DExploration ..."
+    include(srcdir("smoothing.jl"))
+    md"Activating Project Environment for S2DExploration ..."
 end
 
 # ╔═╡ 618eccb3-457c-4530-8d33-4be497967800
@@ -51,15 +51,15 @@ md"
 
 # ╔═╡ 8a43991e-cf8e-4304-9d0e-f235a0da1f36
 @bind armsite Select([
-	"SGP" => "(SGP) Southern Great Plains",
-	"BNF" => "(BNF) Bankhead National Forest",
+    "SGP" => "(SGP) Southern Great Plains",
+    "BNF" => "(BNF) Bankhead National Forest",
 ])
 
 # ╔═╡ 2503e5bc-830c-4a40-a0f8-65ec8e669bb5
 getarmcoordinates() = if armsite == "SGP"
-	return -97.487643, 36.607322;
+    return -97.487643, 36.607322;
 else
-	return -87.338177, 34.342481;
+    return -87.338177, 34.342481;
 end
 
 # ╔═╡ e282e373-f8a9-4a11-b1a7-e1d270b14090
@@ -69,32 +69,32 @@ md"
 
 # ╔═╡ 24fba083-8237-4553-aadc-3768e6097e42
 @bind ID_sgl Select([
-	"blh"  => "(blh) Boundary Layer Height",
-	"skt"  => "(skt) Skin Temperature",
-	"t2m"  => "(t2m) 2-meter Temperature",
-	"d2m"  => "(d2m) 2-meter Dewpoint",
-	"tcc"  => "(tcc) Total Cloud Cover",
-	"hcc"  => "(hcc) High Cloud Cover",
-	"mcc"  => "(mcc) Medium Cloud Cover",
-	"lcc"  => "(lcc) Low Cloud Cover",
-	"sshf" => "(sshf) Surface Surface Heat Flux",
-	"slhf" => "(slhf) Surface Latent Heat Flux",
-	"sp"   => "(sp) Surface Pressure",
-	"tciw" => "(tciw) Total Column Water Ice",
-	"tclw" => "(tclw) Total Column Water Liquid",
-	"tcwv" => "(tcwv) Total Column Water Vapour",
-	"tcw"  => "(tcw)  Total Column Water",
-	"tp"   => "(tp) Total Precipitation",
-	"u10"  => "(u10) 10-meter Zonal Wind",
-	"v10"  => "(v10) 10-meter Meridional Wind",
+    "blh"  => "(blh) Boundary Layer Height",
+    "skt"  => "(skt) Skin Temperature",
+    "t2m"  => "(t2m) 2-meter Temperature",
+    "d2m"  => "(d2m) 2-meter Dewpoint",
+    "tcc"  => "(tcc) Total Cloud Cover",
+    "hcc"  => "(hcc) High Cloud Cover",
+    "mcc"  => "(mcc) Medium Cloud Cover",
+    "lcc"  => "(lcc) Low Cloud Cover",
+    "sshf" => "(sshf) Surface Surface Heat Flux",
+    "slhf" => "(slhf) Surface Latent Heat Flux",
+    "sp"   => "(sp) Surface Pressure",
+    "tciw" => "(tciw) Total Column Water Ice",
+    "tclw" => "(tclw) Total Column Water Liquid",
+    "tcwv" => "(tcwv) Total Column Water Vapour",
+    "tcw"  => "(tcw)  Total Column Water",
+    "tp"   => "(tp) Total Precipitation",
+    "u10"  => "(u10) 10-meter Zonal Wind",
+    "v10"  => "(v10) 10-meter Meridional Wind",
 ])
 
 # ╔═╡ 5edcc0ff-6ddc-470a-88c9-b980545152d6
 @bind ID_pre Select([
-	"w"  => "(w) Pressure Velocity",
-	"t"  => "(t) Air Temperature",
-	"q"  => "(q) Specific Humidity",
-	"d"  => "(div) Divergence",
+    "w"  => "(w) Pressure Velocity",
+    "t"  => "(t) Air Temperature",
+    "q"  => "(q) Specific Humidity",
+    "d"  => "(div) Divergence",
 ])
 
 # ╔═╡ c3329018-a49d-4bc3-b6d3-5bc4ea401157
@@ -117,39 +117,39 @@ longitude2timeshift(longitude::Real) = longitude / 180 * 12
 # ╔═╡ fd353a8b-72a3-4c58-97f1-bb8e94bbbcf4
 function utc2local(data :: Vector,longitude)
 
-	nt = length(data)
-	t = 0:23
-	ts = longitude2timeshift.(longitude)
-	it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
+    nt = length(data)
+    t = 0:23
+    ts = longitude2timeshift.(longitude)
+    it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
 
-	tl = t .+ ts
+    tl = t .+ ts
 
-	itp = AkimaInterpolation(vcat(data,data,data), vcat(tl.-24,tl,tl.+24))
-	var = itp.(it)
+    itp = AkimaInterpolation(vcat(data,data,data), vcat(tl.-24,tl,tl.+24))
+    var = itp.(it)
 
-	return it,var
+    return it,var
 
 end
 
 # ╔═╡ a3a840c6-062c-48a7-a66d-1ec5e375e671
 function utc2local(data :: Matrix,longitude)
 
-	np,nt = size(data)
-	t = 0:23
-	ts = longitude2timeshift.(longitude)
-	it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
+    np,nt = size(data)
+    t = 0:23
+    ts = longitude2timeshift.(longitude)
+    it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
 
-	var = zeros(np,nit)
+    var = zeros(np,nit)
 
-	tl = t .+ ts
+    tl = t .+ ts
 
-	for ip = 1 : np
-		idata = @views data[ip,:]
-		itp = AkimaInterpolation(vcat(idata,idata,idata), vcat(tl.-24,tl,tl.+24))
-		var[ip,:] = itp.(it)
-	end
+    for ip = 1 : np
+        idata = @views data[ip,:]
+        itp = AkimaInterpolation(vcat(idata,idata,idata), vcat(tl.-24,tl,tl.+24))
+        var[ip,:] = itp.(it)
+    end
 
-	return it,var
+    return it,var
 
 end
 
@@ -161,84 +161,84 @@ md"
 # ╔═╡ 10662679-91f7-43e6-83fd-b9eeb02794ca
 function load_climatology(armsite,e5ds,evar::SingleLevel;month::Int=0)
 
-	sds = read_climatology(armsite,e5ds,esgl)
-	dt  = sds["valid_time"][:]
-	jj = dt .>= Date(1990)
-	if iszero(month)
-		sgl = sds[esgl.ncID][jj]
-	else
-		ii = Month(dt) .== month
-		sgl = sds[esgl.ncID][jj][ii]
-	end
-	close(sds)
-	sgl = dropdims(mean(reshape(sgl,24,:),dims=2),dims=2)
+    sds = read_climatology(armsite,e5ds,esgl)
+    dt  = sds["valid_time"][:]
+    jj = dt .>= Date(1990)
+    if iszero(month)
+        sgl = sds[esgl.ncID][jj]
+    else
+        ii = Month(dt) .== month
+        sgl = sds[esgl.ncID][jj][ii]
+    end
+    close(sds)
+    sgl = dropdims(mean(reshape(sgl,24,:),dims=2),dims=2)
 
-	slon,_ = getarmcoordinates()
-	t_s,sgl = utc2local(sgl,slon)
-	
-	return t_s,sgl
+    slon,_ = getarmcoordinates()
+    t_s,sgl = utc2local(sgl,slon)
+    
+    return t_s,sgl
 
 end
 
 # ╔═╡ 9ed3ced3-a38c-4edf-9cfd-510b564661de
 function load_climatology(armsite,e5ds,evar::PressureLevel;month::Int=0)
 
-	pds = read_climatology(armsite,e5ds,epre)
-	dt  = pds["valid_time"][:]
-	jj = dt .>= Date(1990)
-	lvl = pds["pressures"][:]; nlvl = length(lvl)
-	if iszero(month)
-		pre = pds[evar.ncID][:,jj]
-	else
-		ii = Month(dt) .== month
-		pre = pds[evar.ncID][:,jj][:,ii]
-	end
-	close(pds)
-	pre = dropdims(mean(reshape(pre,nlvl,24,:),dims=3),dims=3)
-	
-	slon,_ = getarmcoordinates()
-	t_p,pre = utc2local(pre,slon)
-	
-	return t_p,lvl,pre
+    pds = read_climatology(armsite,e5ds,epre)
+    dt  = pds["valid_time"][:]
+    jj = dt .>= Date(1990)
+    lvl = pds["pressures"][:]; nlvl = length(lvl)
+    if iszero(month)
+        pre = pds[evar.ncID][:,jj]
+    else
+        ii = Month(dt) .== month
+        pre = pds[evar.ncID][:,jj][:,ii]
+    end
+    close(pds)
+    pre = dropdims(mean(reshape(pre,nlvl,24,:),dims=3),dims=3)
+    
+    slon,_ = getarmcoordinates()
+    t_p,pre = utc2local(pre,slon)
+    
+    return t_p,lvl,pre
 
 end
 
 # ╔═╡ a0757349-bf33-41bf-952e-723d874b9dcc
 begin
-	t_s,sgl = load_climatology(armsite,e5ds,esgl)
-	md"Loading Single-Level Variable: $(esgl.ID)"
+    t_s,sgl = load_climatology(armsite,e5ds,esgl)
+    md"Loading Single-Level Variable: $(esgl.ID)"
 end
 
 # ╔═╡ 2b99c24a-75bc-4f5b-9171-a6d297d74722
 begin
-	t_p,lvl,pre = load_climatology(armsite,e5ds,epre)
-	md"Loading Pressure-Level Variable: $(epre.ID)"
+    t_p,lvl,pre = load_climatology(armsite,e5ds,epre)
+    md"Loading Pressure-Level Variable: $(epre.ID)"
 end
 
 # ╔═╡ 9b857d52-fab4-4b14-a58a-adcf9aee96b2
 begin
-	f1 = Figure()
-	
-	ax1_1 = Axis(
-		f1[1,1],width=500,height=300,ylabel="Pressure / hPa",
-		xticklabelsvisible=false,
-		# yscale=log10,yticks=[10,100,1000]
-	)
+    f1 = Figure()
+    
+    ax1_1 = Axis(
+        f1[1,1],width=500,height=300,ylabel="Pressure / hPa",
+        xticklabelsvisible=false,
+        # yscale=log10,yticks=[10,100,1000]
+    )
 
-	c1 = heatmap!(ax1_1,t_p,lvl,pre',colorrange=(-1,1).*1e-1,colormap=:RdBu)
-	xlims!(ax1_1,0,24)
-	ylims!(ax1_1,1000,10)
+    c1 = heatmap!(ax1_1,t_p,lvl,pre',colorrange=(-1,1).*1e-1,colormap=:RdBu)
+    xlims!(ax1_1,0,24)
+    ylims!(ax1_1,1000,10)
 
-	# axislegend()
-	
-	ax1_2 = Axis(f1[2,1],width=500,height=50,xlabel="Local Time")
+    # axislegend()
+    
+    ax1_2 = Axis(f1[2,1],width=500,height=50,xlabel="Local Time")
 
-	lines!(ax1_2,t_s,sgl)
-	xlims!(ax1_2,0,24)
+    lines!(ax1_2,t_s,sgl)
+    xlims!(ax1_2,0,24)
 
-	Colorbar(f1[1,2], c1,)
-	resize_to_layout!(f1)
-	f1
+    Colorbar(f1[1,2], c1,)
+    resize_to_layout!(f1)
+    f1
 end
 
 # ╔═╡ Cell order:

@@ -18,22 +18,22 @@ end
 
 # ╔═╡ 5692ccd8-6056-11f0-07da-d1ae989cdac1
 begin
-	using Pkg; Pkg.activate()
-	using DrWatson
+    using Pkg; Pkg.activate()
+    using DrWatson
 end
 
 # ╔═╡ bd5e50c0-5d29-410e-8389-beb8b636307d
 begin
-	@quickactivate "S2DExploration"
-	using PlutoUI
-	using Dates, DelimitedFiles, Printf, StatsBase
-	using GeoRegions, ERA5Reanalysis
-	using DataInterpolations
-	using CairoMakie, LaTeXStrings
-	set_theme!(theme_latexfonts())
+    @quickactivate "S2DExploration"
+    using PlutoUI
+    using Dates, DelimitedFiles, Printf, StatsBase
+    using GeoRegions, ERA5Reanalysis
+    using DataInterpolations
+    using CairoMakie, LaTeXStrings
+    set_theme!(theme_latexfonts())
 
-	include(srcdir("smoothing.jl"))
-	md"Activating Project Environment for S2DExploration ..."
+    include(srcdir("smoothing.jl"))
+    md"Activating Project Environment for S2DExploration ..."
 end
 
 # ╔═╡ 618eccb3-457c-4530-8d33-4be497967800
@@ -51,15 +51,15 @@ md"
 
 # ╔═╡ 8a43991e-cf8e-4304-9d0e-f235a0da1f36
 @bind armsite Select([
-	"SGP" => "(SGP) Southern Great Plains",
-	"BNF" => "(BNF) Bankhead National Forest",
+    "SGP" => "(SGP) Southern Great Plains",
+    "BNF" => "(BNF) Bankhead National Forest",
 ])
 
 # ╔═╡ 2503e5bc-830c-4a40-a0f8-65ec8e669bb5
 getarmcoordinates() = if armsite == "SGP"
-	return -97.487643, 36.607322;
+    return -97.487643, 36.607322;
 else
-	return -87.338177, 34.342481;
+    return -87.338177, 34.342481;
 end
 
 # ╔═╡ e282e373-f8a9-4a11-b1a7-e1d270b14090
@@ -81,39 +81,39 @@ longitude2timeshift(longitude::Real) = longitude / 180 * 12
 # ╔═╡ fd353a8b-72a3-4c58-97f1-bb8e94bbbcf4
 function utc2local(data :: Vector,longitude)
 
-	nt = length(data)
-	t = 0:23
-	ts = longitude2timeshift.(longitude)
-	it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
+    nt = length(data)
+    t = 0:23
+    ts = longitude2timeshift.(longitude)
+    it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
 
-	tl = t .+ ts
+    tl = t .+ ts
 
-	itp = AkimaInterpolation(vcat(data,data,data), vcat(tl.-24,tl,tl.+24))
-	var = itp.(it)
+    itp = AkimaInterpolation(vcat(data,data,data), vcat(tl.-24,tl,tl.+24))
+    var = itp.(it)
 
-	return it,var
+    return it,var
 
 end
 
 # ╔═╡ a3a840c6-062c-48a7-a66d-1ec5e375e671
 function utc2local(data :: Matrix,longitude)
 
-	np,nt = size(data)
-	t = 0:23
-	ts = longitude2timeshift.(longitude)
-	it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
+    np,nt = size(data)
+    t = 0:23
+    ts = longitude2timeshift.(longitude)
+    it = (0:0.5:24); it = (it[2:end].+it[1:(end-1)])/2; nit = length(it)
 
-	var = zeros(np,nit)
+    var = zeros(np,nit)
 
-	tl = t .+ ts
+    tl = t .+ ts
 
-	for ip = 1 : np
-		idata = @views data[ip,:]
-		itp = AkimaInterpolation(vcat(idata,idata,idata), vcat(tl.-24,tl,tl.+24))
-		var[ip,:] = itp.(it)
-	end
+    for ip = 1 : np
+        idata = @views data[ip,:]
+        itp = AkimaInterpolation(vcat(idata,idata,idata), vcat(tl.-24,tl,tl.+24))
+        var[ip,:] = itp.(it)
+    end
 
-	return it,var
+    return it,var
 
 end
 
@@ -128,142 +128,142 @@ md"Month: $(@bind mo PlutoUI.Slider(1:12))"
 # ╔═╡ 10662679-91f7-43e6-83fd-b9eeb02794ca
 function load_climatology(armsite,e5ds,evar::SingleLevel;month::Int=0)
 
-	sds = read_climatology(armsite,e5ds,evar)
-	dt  = sds["valid_time"][:]
-	jj = dt .>= Date(1990)
-	if iszero(month)
-		sgl = sds[evar.ncID][jj]
-	else
-		ii = Dates.month.(dt[jj]) .== month
-		sgl = sds[evar.ncID][jj][ii]
-	end
-	close(sds)
-	sgl = dropdims(mean(reshape(sgl,24,:),dims=2),dims=2)
+    sds = read_climatology(armsite,e5ds,evar)
+    dt  = sds["valid_time"][:]
+    jj = dt .>= Date(1990)
+    if iszero(month)
+        sgl = sds[evar.ncID][jj]
+    else
+        ii = Dates.month.(dt[jj]) .== month
+        sgl = sds[evar.ncID][jj][ii]
+    end
+    close(sds)
+    sgl = dropdims(mean(reshape(sgl,24,:),dims=2),dims=2)
 
-	slon,_ = getarmcoordinates()
-	t_s,sgl = utc2local(sgl,slon)
-	
-	return t_s,sgl
+    slon,_ = getarmcoordinates()
+    t_s,sgl = utc2local(sgl,slon)
+    
+    return t_s,sgl
 
 end
 
 # ╔═╡ 9ed3ced3-a38c-4edf-9cfd-510b564661de
 function load_climatology(armsite,e5ds,evar::PressureLevel;month::Int=0)
 
-	pds = read_climatology(armsite,e5ds,evar)
-	dt  = pds["valid_time"][:]
-	jj = dt .>= Date(1990)
-	lvl = pds["pressures"][:]; nlvl = length(lvl)
-	if iszero(month)
-		pre = pds[evar.ncID][:,jj]
-	else
-		ii = Dates.month.(dt[jj]) .== month
-		pre = pds[evar.ncID][:,jj][:,ii]
-	end
-	close(pds)
-	pre = dropdims(mean(reshape(pre,nlvl,24,:),dims=3),dims=3)
-	
-	slon,_ = getarmcoordinates()
-	t_p,pre = utc2local(pre,slon)
-	
-	return t_p,lvl,pre
+    pds = read_climatology(armsite,e5ds,evar)
+    dt  = pds["valid_time"][:]
+    jj = dt .>= Date(1990)
+    lvl = pds["pressures"][:]; nlvl = length(lvl)
+    if iszero(month)
+        pre = pds[evar.ncID][:,jj]
+    else
+        ii = Dates.month.(dt[jj]) .== month
+        pre = pds[evar.ncID][:,jj][:,ii]
+    end
+    close(pds)
+    pre = dropdims(mean(reshape(pre,nlvl,24,:),dims=3),dims=3)
+    
+    slon,_ = getarmcoordinates()
+    t_p,pre = utc2local(pre,slon)
+    
+    return t_p,lvl,pre
 
 end
 
 # ╔═╡ a0757349-bf33-41bf-952e-723d874b9dcc
 begin
-	t_s,tcc = load_climatology(armsite,e5ds,month=mo,SingleVariable("tcc"))
-	_,tcwv  = load_climatology(armsite,e5ds,month=mo,SingleVariable("tcwv"))
-	_,skt   = load_climatology(armsite,e5ds,month=mo,SingleVariable("skt"))
-	_,hcc   = load_climatology(armsite,e5ds,month=mo,SingleVariable("hcc"))
-	_,mcc   = load_climatology(armsite,e5ds,month=mo,SingleVariable("mcc"))
-	_,lcc   = load_climatology(armsite,e5ds,month=mo,SingleVariable("lcc"))
-	_,ttr   = load_climatology(armsite,e5ds,month=mo,SingleVariable("ttr"))
-	_,blh   = load_climatology(armsite,e5ds,month=mo,SingleVariable("blh"))
-	_,tp    = load_climatology(armsite,e5ds,month=mo,SingleVariable("tp"))
-	md"Loading single level variable climatologies ..."
+    t_s,tcc = load_climatology(armsite,e5ds,month=mo,SingleVariable("tcc"))
+    _,tcwv  = load_climatology(armsite,e5ds,month=mo,SingleVariable("tcwv"))
+    _,skt   = load_climatology(armsite,e5ds,month=mo,SingleVariable("skt"))
+    _,hcc   = load_climatology(armsite,e5ds,month=mo,SingleVariable("hcc"))
+    _,mcc   = load_climatology(armsite,e5ds,month=mo,SingleVariable("mcc"))
+    _,lcc   = load_climatology(armsite,e5ds,month=mo,SingleVariable("lcc"))
+    _,ttr   = load_climatology(armsite,e5ds,month=mo,SingleVariable("ttr"))
+    _,blh   = load_climatology(armsite,e5ds,month=mo,SingleVariable("blh"))
+    _,tp    = load_climatology(armsite,e5ds,month=mo,SingleVariable("tp"))
+    md"Loading single level variable climatologies ..."
 end
 
 # ╔═╡ 2b99c24a-75bc-4f5b-9171-a6d297d74722
 begin
-	t_p,lvl,w = load_climatology(armsite,e5ds,month=mo,PressureVariable("w"));
-	_,_,t = load_climatology(armsite,e5ds,month=mo,PressureVariable("t"));
-	_,_,q = load_climatology(armsite,e5ds,month=mo,PressureVariable("q"));
-	md"Loading pressure level variable climatologies ..."
+    t_p,lvl,w = load_climatology(armsite,e5ds,month=mo,PressureVariable("w"));
+    _,_,t = load_climatology(armsite,e5ds,month=mo,PressureVariable("t"));
+    _,_,q = load_climatology(armsite,e5ds,month=mo,PressureVariable("q"));
+    md"Loading pressure level variable climatologies ..."
 end
 
 # ╔═╡ 9b857d52-fab4-4b14-a58a-adcf9aee96b2
 begin
-	fig = Figure()
+    fig = Figure()
 
-	axs = Matrix{Axis}(undef,4,3)
+    axs = Matrix{Axis}(undef,4,3)
 
-	for irow = 1 : 4, icol = 1 : 3
-		if isone(irow)
-			axs[irow,icol] = Axis(
-				fig[irow,icol],width=200,height=120,
-				xticklabelsvisible=false,
-				# yticklabelsvisible=isone(icol),
-				# yscale=log10,yticks=[10,100,1000]
-			)
-			ylims!(axs[irow,icol],1000,10)
-		else
-			axs[irow,icol] = Axis(
-				fig[irow+1,icol],width=200,height=50,
-				xticklabelsvisible=irow==4,
-				# yticklabelsvisible=isone(icol),
-			)
-		end
-		xlims!(axs[irow,icol],0,24)
-	end
-	
+    for irow = 1 : 4, icol = 1 : 3
+        if isone(irow)
+            axs[irow,icol] = Axis(
+                fig[irow,icol],width=200,height=120,
+                xticklabelsvisible=false,
+                # yticklabelsvisible=isone(icol),
+                # yscale=log10,yticks=[10,100,1000]
+            )
+            ylims!(axs[irow,icol],1000,10)
+        else
+            axs[irow,icol] = Axis(
+                fig[irow+1,icol],width=200,height=50,
+                xticklabelsvisible=irow==4,
+                # yticklabelsvisible=isone(icol),
+            )
+        end
+        xlims!(axs[irow,icol],0,24)
+    end
+    
 
-	cbr_1 = heatmap!(axs[1,1],t_p,lvl,w',colorrange=(-1,1).*1e-1,colormap=:RdBu)
-	cbr_2 = heatmap!(axs[1,2],t_p,lvl,(t.-mean(t,dims=2))',colorrange=(-2,2),colormap=:balance)
-	cbr_3 = heatmap!(axs[1,3],t_p,lvl,(q.-mean(q,dims=2))'*1000,colorrange=(-5,5).*1e-1,colormap=:BrBg)
+    cbr_1 = heatmap!(axs[1,1],t_p,lvl,w',colorrange=(-1,1).*1e-1,colormap=:RdBu)
+    cbr_2 = heatmap!(axs[1,2],t_p,lvl,(t.-mean(t,dims=2))',colorrange=(-2,2),colormap=:balance)
+    cbr_3 = heatmap!(axs[1,3],t_p,lvl,(q.-mean(q,dims=2))'*1000,colorrange=(-5,5).*1e-1,colormap=:BrBg)
 
-	lines!(axs[2,1],t_s,tcc*100)
-	lines!(axs[3,1],t_s,tcwv)
-	lines!(axs[4,1],t_s,skt)
-	lines!(axs[2,2],t_s,hcc*100)
-	lines!(axs[3,2],t_s,mcc*100)
-	lines!(axs[4,2],t_s,lcc*100)
-	lines!(axs[2,3],t_s,-ttr/3600)
-	lines!(axs[3,3],t_s,blh/1000)
-	lines!(axs[4,3],t_s,tp*1000)
+    lines!(axs[2,1],t_s,tcc*100)
+    lines!(axs[3,1],t_s,tcwv)
+    lines!(axs[4,1],t_s,skt)
+    lines!(axs[2,2],t_s,hcc*100)
+    lines!(axs[3,2],t_s,mcc*100)
+    lines!(axs[4,2],t_s,lcc*100)
+    lines!(axs[2,3],t_s,-ttr/3600)
+    lines!(axs[3,3],t_s,blh/1000)
+    lines!(axs[4,3],t_s,tp*1000)
 
-	axs[1,1].ylabel = "Pressure / hPa"
-	axs[2,1].ylabel = "%"
-	axs[3,1].ylabel = "mm"
-	axs[4,1].ylabel = "K"
-	axs[2,2].ylabel = "%"
-	axs[3,2].ylabel = "%"
-	axs[4,2].ylabel = "%"
-	axs[2,3].ylabel = L"W m$^{-2}$"
-	axs[3,3].ylabel = "km"
-	axs[4,3].ylabel = L"mm hr$^{-1}$"
+    axs[1,1].ylabel = "Pressure / hPa"
+    axs[2,1].ylabel = "%"
+    axs[3,1].ylabel = "mm"
+    axs[4,1].ylabel = "K"
+    axs[2,2].ylabel = "%"
+    axs[3,2].ylabel = "%"
+    axs[4,2].ylabel = "%"
+    axs[2,3].ylabel = L"W m$^{-2}$"
+    axs[3,3].ylabel = "km"
+    axs[4,3].ylabel = L"mm hr$^{-1}$"
 
-	Label(fig[1,1],halign=:right,valign=:top,padding=(0,5,0,5),L"\omega")
-	Label(fig[1,2],halign=:right,valign=:top,padding=(0,7,0,5),L"T'")
-	Label(fig[1,3],halign=:right,valign=:top,padding=(0,7,0,5),L"q'")
-	Label(fig[3,1],halign=:right,valign=:top,padding=(0,5,0,5),"Total Cloud Cover")
-	Label(fig[3,2],halign=:right,valign=:top,padding=(0,5,0,5),"High Cloud Cover")
-	Label(fig[3,3],halign=:right,valign=:top,padding=(0,5,0,5),"OLR")
-	Label(fig[4,1],halign=:right,valign=:top,padding=(0,5,0,5),"Column Water Vapor")
-	Label(fig[4,2],halign=:right,valign=:top,padding=(0,5,0,5),"Medium Cloud Cover")
-	Label(fig[4,3],halign=:right,valign=:top,padding=(0,5,0,5),"Boundary Layer Height")
-	Label(fig[5,1],halign=:right,valign=:top,padding=(0,5,0,5),"Skin Temperature")
-	Label(fig[5,2],halign=:right,valign=:top,padding=(0,5,0,5),"Low Cloud Cover")
-	Label(fig[5,3],halign=:right,valign=:top,padding=(0,5,0,5),"Rainfall Rate")
+    Label(fig[1,1],halign=:right,valign=:top,padding=(0,5,0,5),L"\omega")
+    Label(fig[1,2],halign=:right,valign=:top,padding=(0,7,0,5),L"T'")
+    Label(fig[1,3],halign=:right,valign=:top,padding=(0,7,0,5),L"q'")
+    Label(fig[3,1],halign=:right,valign=:top,padding=(0,5,0,5),"Total Cloud Cover")
+    Label(fig[3,2],halign=:right,valign=:top,padding=(0,5,0,5),"High Cloud Cover")
+    Label(fig[3,3],halign=:right,valign=:top,padding=(0,5,0,5),"OLR")
+    Label(fig[4,1],halign=:right,valign=:top,padding=(0,5,0,5),"Column Water Vapor")
+    Label(fig[4,2],halign=:right,valign=:top,padding=(0,5,0,5),"Medium Cloud Cover")
+    Label(fig[4,3],halign=:right,valign=:top,padding=(0,5,0,5),"Boundary Layer Height")
+    Label(fig[5,1],halign=:right,valign=:top,padding=(0,5,0,5),"Skin Temperature")
+    Label(fig[5,2],halign=:right,valign=:top,padding=(0,5,0,5),"Low Cloud Cover")
+    Label(fig[5,3],halign=:right,valign=:top,padding=(0,5,0,5),"Rainfall Rate")
 
-	Label(fig[0,:],"$(monthname(mo)) Climatology at the $armsite ARM Site (1980-2024)",font=:bold)
-	Label(fig[6,:],"Hour of Day")
+    Label(fig[0,:],"$(monthname(mo)) Climatology at the $armsite ARM Site (1980-2024)",font=:bold)
+    Label(fig[6,:],"Hour of Day")
 
-	Colorbar(fig[2,1],cbr_1,vertical=false,flipaxis=false,label=L"Pa s$^{-1}$")
-	Colorbar(fig[2,2],cbr_2,vertical=false,flipaxis=false,label="K")
-	Colorbar(fig[2,3],cbr_3,vertical=false,flipaxis=false,label=L"g kg$^{-1}$")
-	resize_to_layout!(fig)
-	fig
+    Colorbar(fig[2,1],cbr_1,vertical=false,flipaxis=false,label=L"Pa s$^{-1}$")
+    Colorbar(fig[2,2],cbr_2,vertical=false,flipaxis=false,label="K")
+    Colorbar(fig[2,3],cbr_3,vertical=false,flipaxis=false,label=L"g kg$^{-1}$")
+    resize_to_layout!(fig)
+    fig
 end
 
 # ╔═╡ a6d6a109-fe25-417d-8334-2df5cacfe318

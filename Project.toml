@@ -30,6 +30,7 @@ Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
 [sources]
 ARMLive = {rev = "main", url = "https://github.com/natgeo-wong/ARMLive.jl.git"}
 ERA5Reanalysis = {rev = "main", url = "https://github.com/GeoRegionsEcosystem/ERA5Reanalysis.jl.git"}
+ETOPO = {rev = "main", url = "https://github.com/GeoRegionsEcosystem/ETOPO.jl.git"}
 NASAPrecipitation = {rev = "main", url = "https://github.com/GeoRegionsEcosystem/NASAPrecipitation.jl.git"}
 
 [compat]

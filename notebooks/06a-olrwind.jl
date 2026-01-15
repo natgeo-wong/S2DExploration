@@ -38,7 +38,7 @@ end
 
 # ╔═╡ 618eccb3-457c-4530-8d33-4be497967800
 md"
-# 02g. NASA vs ERA5 Comparison: Outgoing Longwave Radiation
+# 06a. OLR vs Wind / Divergence
 "
 
 # ╔═╡ 370903b1-1c85-4337-89c0-fd7cc358359d
@@ -48,22 +48,6 @@ TableOfContents()
 md"
 ### A. Loading Station and ERA5 Dataset Information
 "
-
-# ╔═╡ baaf05e1-f7a8-49f1-850d-d42cb2ed0f2e
-begin    
-    sgp_info = readdlm(datadir("ARMstations_SGP.csv"),',',skipstart=1)[:,1:6]
-    bnf_info = readdlm(datadir("ARMstations_BNF.csv"),',',skipstart=1)[:,1:6]
-    sgp_info = sgp_info[.!isnan.(sgp_info[:,5]),:]
-    bnf_info = bnf_info[.!isnan.(bnf_info[:,5]),:]
-    
-    sgp_info[sgp_info[:,4].=="N/A",4] .= "$(Date(now()))"
-    sgp_info[:,3]  = Date.(sgp_info[:,3])
-    sgp_info[:,4]  = Date.(sgp_info[:,4])
-
-    nsgp = size(sgp_info,1)
-    nbnf = size(bnf_info,1)
-    md"Loading ARM station coordinates in the Southern Great Plains"
-end
 
 # ╔═╡ 8a43991e-cf8e-4304-9d0e-f235a0da1f36
 @bind armsite Select([
@@ -75,24 +59,10 @@ end
 e5ds = ERA5Hourly(start=Date(1980),stop=Date(2024,12),path=datadir())
 
 # ╔═╡ 28d526bc-bf12-48a0-82a8-bcefc38c35ae
-evar = SingleVariable("ttr")
+ovar = SingleVariable("ttr")
 
-# ╔═╡ 1f7f1d77-85cd-4bac-921c-6e43d7f00991
-elon,elat = ERA5Reanalysis.nativelonlat()
-
-# ╔═╡ 149ad521-c0dc-4c09-b1d8-127c2500c23d
-begin
-    blon,blat = NASAMergedTb.btdlonlat()
-    ggrd1 = RegionGrid(GeoRegion("SGP",path=srcdir()),blon,blat)
-    nlon_SGP = length(ggrd1.lon); nlat_SGP = length(ggrd1.lat)
-    blongrid1 = zeros(nlon_SGP,nlat_SGP); blongrid1 .= ggrd1.lon
-    blatgrid1 = zeros(nlon_SGP,nlat_SGP); blatgrid1 .= reshape(ggrd1.lat,1,:)
-    ggrd2 = RegionGrid(GeoRegion("BNF",path=srcdir()),blon,blat)
-    nlon_BNF = length(ggrd2.lon); nlat_BNF = length(ggrd2.lat)
-    blongrid2 = zeros(nlon_BNF,nlat_BNF); blongrid2 .= ggrd2.lon
-    blatgrid2 = zeros(nlon_BNF,nlat_BNF); blatgrid2 .= reshape(ggrd2.lat,1,:);
-    md"Loading Brightness Temperature Grid Information ..."
-end
+# ╔═╡ 59631b9b-895b-4e08-a81e-f72f86e9aeaf
+dvar = SingleVariable("d")
 
 # ╔═╡ bba26d40-6808-485e-9834-82ea4dc6c176
 md"
@@ -112,26 +82,6 @@ if armsite == "SGP"
 else
     stnID = bnf_info[iistn,1];
 end;
-
-# ╔═╡ d9818f36-6dd5-45d1-b56b-42392ed79049
-begin
-    tds = NCDataset(datadir(
-        "mergedIR","timeseries-OLR",
-        "OLR-$(armsite)_$(stnID)-20010101-20241231.nc"
-    ))
-    ndt = tds["valid_time"][:]
-    olr = tds["OLR"][:]
-    close(tds)
-end
-
-# ╔═╡ 215d963f-3019-46ad-b139-569df1cad1e9
-begin
-    eds = read_climatology(armsite,e5ds,evar)
-    edt = eds["valid_time"][:]
-    var = eds[evar.ncID][:] / -3600
-    close(eds)
-    md"Loading Single-Level Variable: $(evar.ID)"
-end
 
 # ╔═╡ 7cf5b637-8443-45b3-91db-781f01f75810
 dtbeg = Date(2001,7)
@@ -317,18 +267,39 @@ end
 # ╔═╡ 5421f7e1-83a4-4e1d-b237-3f969f60e1a5
 CairoMakie.save(plotsdir("02g-OLRcomparison.png"),f3)
 
+# ╔═╡ 215d963f-3019-46ad-b139-569df1cad1e9
+begin
+    eds = read_climatology(armsite,e5ds,ovar)
+    edt = eds["valid_time"][:]
+    olr = eds[ovar.ncID][:] / -3600
+    close(eds)
+    eds = read_climatology(armsite,e5ds,dvar)
+    ∇   = eds[dvar.ncID][:,:]
+    close(eds)
+    md"Loading Single-Level Variable: $(evar.ID)"
+end
+
+# ╔═╡ d9818f36-6dd5-45d1-b56b-42392ed79049
+begin
+    tds = NCDataset(datadir(
+        "mergedIR","timeseries-OLR",
+        "OLR-$(armsite)_$(stnID)-20010101-20241231.nc"
+    ))
+    ndt = tds["valid_time"][:]
+    olr = tds["OLR"][:]
+    close(tds)
+end
+
 # ╔═╡ Cell order:
-# ╟─618eccb3-457c-4530-8d33-4be497967800
+# ╠═618eccb3-457c-4530-8d33-4be497967800
 # ╟─5692ccd8-6056-11f0-07da-d1ae989cdac1
 # ╟─bd5e50c0-5d29-410e-8389-beb8b636307d
 # ╟─370903b1-1c85-4337-89c0-fd7cc358359d
 # ╟─2205ab68-6602-4222-b3d5-1ebf2a7b8082
-# ╟─baaf05e1-f7a8-49f1-850d-d42cb2ed0f2e
 # ╟─8a43991e-cf8e-4304-9d0e-f235a0da1f36
 # ╟─27c17138-69a7-4fdd-bd66-8904a007d509
 # ╟─28d526bc-bf12-48a0-82a8-bcefc38c35ae
-# ╟─1f7f1d77-85cd-4bac-921c-6e43d7f00991
-# ╟─149ad521-c0dc-4c09-b1d8-127c2500c23d
+# ╠═59631b9b-895b-4e08-a81e-f72f86e9aeaf
 # ╟─bba26d40-6808-485e-9834-82ea4dc6c176
 # ╟─1a48c947-198a-4e85-af2d-87dc2eefe94a
 # ╟─17897c14-ebce-4947-8c85-668d4818423f
