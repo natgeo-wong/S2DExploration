@@ -59,7 +59,7 @@ z  = ds["height"][:]
 varDict = Dict(ds[varID].attrib)
 close(ds)
 
-mat_monthly = reshape(mat_monthly,332,6,24,12)
+mat_monthly = reshape(mat_monthly,133,6,24,12)
 mat_monthly = dropdims(mean(mat_monthly,dims=2),dims=2)
 
 fnc = joinpath(
